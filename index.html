@@ -63,6 +63,17 @@
   input[type=file]{display:none}
   .hint{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:9px;line-height:1.55}
 
+  /* ---- filtros por dia ---- */
+  .filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .filters .flbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .fchips{display:flex;gap:6px;flex-wrap:wrap}
+  .fchip{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:1px solid var(--line-2);background:var(--panel);color:var(--muted);border-radius:5px;padding:6px 11px;line-height:1}
+  .fchip:hover{border-color:var(--muted);color:var(--ink)}
+  .fchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .fchip.day{border-left:4px solid var(--c)}
+  .fchip.day.on{background:var(--c);border-color:var(--c);color:#fff}
+  .listhead{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 4px 2px}
+
   /* ---- legenda ---- */
   .legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:10px 4px 4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
   .lg{display:inline-flex;align-items:center;gap:6px}
@@ -88,6 +99,7 @@
   .unit-next .nx-day{font-size:12px;font-weight:700;color:#fff;background:var(--day,#5b6573);padding:3px 8px;border-radius:4px;letter-spacing:.06em}
   .unit-next .nx-rel{font-size:11px;color:var(--muted)}
   .unit-next.na .nx-day{background:var(--inset-2);color:var(--faint)}
+  .nx-day.daily{background:#3a455a;letter-spacing:.08em}
 
   /* faixa semanal */
   .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px;max-width:430px}
@@ -148,6 +160,8 @@
     </div>
   </div>
 
+  <div id="filters" class="filters"></div>
+
   <div id="import">
     <textarea id="csvText" placeholder="Cole aqui o conteúdo da aba DADOS (CSV) — ou envie o arquivo .csv"></textarea>
     <div class="row">
@@ -173,7 +187,7 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQVjhVlvnXYXshA
 const $ = s => document.querySelector(s);
 const results=$("#results"), statusEl=$("#status"), countEl=$("#count");
 
-let HEADERS=[], ROWS=[], DAY_COLS=[], REGIONS=[], MODE="matrix", DAY_COL=-1;
+let HEADERS=[], ROWS=[], DAY_COLS=[], DAILY_COLS=[], HEADER_BLOCK=[], ALL_DAY_KEYS=[], REGIONS=[], MODE="matrix", DAY_COL=-1, activeFilter=null;
 
 /* ---------- helpers ---------- */
 const norm = s => (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/\s+/g," ").trim();
@@ -267,11 +281,22 @@ function detectDayColumnFallback(){ // modo linha: coluna cujos valores são dia
   }
   return best;
 }
+function detectDailyColumns(){ // coluna(s) de "ROTAS DIÁRIAS" no cabeçalho
+  const dayIdx=new Set(DAY_COLS.map(c=>c.idx));
+  const cols=[];
+  for(let i=0;i<HEADERS.length;i++){
+    if(dayIdx.has(i)) continue;          // já é coluna de dia
+    let txt="";
+    for(const row of HEADER_BLOCK){ txt+=" "+norm(row[i]||""); }
+    if(/DIARI|TODO DIA|TODOS OS DIAS/.test(txt)) cols.push({idx:i});
+  }
+  return cols;
+}
 
 /* ---------- montar índice região -> dias (com unificação de grafias) ---------- */
 function buildRegions(){
   // 1) agrupa por grafia normalizada exata
-  const exact=new Map(); // normKey -> {key,count,displays:Map,days:Set}
+  const exact=new Map(); // normKey -> {key,count,displays:Map,days:Set,daily}
   for(const c of DAY_COLS){
     for(const r of ROWS){
       const raw=(r[c.idx]||"").trim();
@@ -279,8 +304,21 @@ function buildRegions(){
       const key=norm(raw);
       if(!key) continue;
       let e=exact.get(key);
-      if(!e){ e={key,count:0,displays:new Map(),days:new Set()}; exact.set(key,e); }
+      if(!e){ e={key,count:0,displays:new Map(),days:new Set(),daily:false}; exact.set(key,e); }
       e.count++; e.days.add(c.key);
+      e.displays.set(raw,(e.displays.get(raw)||0)+1);
+    }
+  }
+  // 1b) rotas diárias — entrega todo dia útil
+  for(const c of DAILY_COLS){
+    for(const r of ROWS){
+      const raw=(r[c.idx]||"").trim();
+      if(!raw) continue;
+      const key=norm(raw);
+      if(!key) continue;
+      let e=exact.get(key);
+      if(!e){ e={key,count:0,displays:new Map(),days:new Set(),daily:false}; exact.set(key,e); }
+      e.count++; e.daily=true;
       e.displays.set(raw,(e.displays.get(raw)||0)+1);
     }
   }
@@ -299,15 +337,17 @@ function buildRegions(){
   }
   // 3) consolida cada cluster num só registro
   REGIONS=clusters.map(members=>{
-    const days=new Set(), keys=[], dispCount=new Map();
+    const days=new Set(), keys=[], dispCount=new Map(); let daily=false;
     members.forEach(m=>{
       m.days.forEach(d=>days.add(d));
+      if(m.daily) daily=true;
       keys.push(m.key);
       m.displays.forEach((c,d)=> dispCount.set(d,(dispCount.get(d)||0)+c));
     });
-    // nome exibido: grafia mais frequente; empate -> a mais longa (costuma ser a correta)
     const canonical=[...dispCount.entries()].sort((a,b)=> b[1]-a[1] || b[0].length-a[0].length)[0][0];
-    return {display:canonical, dayKeys:[...days], keys, variants:[...dispCount.keys()]};
+    // diária = entrega em todos os dias da grade
+    const dayKeys = daily ? ALL_DAY_KEYS.slice() : [...days];
+    return {display:canonical, dayKeys, keys, variants:[...dispCount.keys()], daily};
   });
 }
 
@@ -327,17 +367,23 @@ function ingest(text){
   const grid=parseCSV(text);
   if(grid.length<2) throw new Error("poucos dados");
   const hr=findHeaderRow(grid);
+  HEADER_BLOCK=grid.slice(0,hr+1);
   HEADERS=grid[hr].map(h=>h.trim());
   ROWS=grid.slice(hr+1);
+  activeFilter=null;
   DAY_COLS=detectDayColumns();
+  DAILY_COLS=detectDailyColumns();
+  ALL_DAY_KEYS=WEEK_ORDER.filter(k=>DAY_COLS.some(c=>c.key===k));
   if(DAY_COLS.length>=2){
     MODE="matrix"; buildRegions();
-    countEl.innerHTML="<b>"+REGIONS.length+"</b> regiões · "+DAY_COLS.length+" dias";
+    const nd=REGIONS.filter(e=>e.daily).length;
+    countEl.innerHTML="<b>"+REGIONS.length+"</b> regiões · "+DAY_COLS.length+" dias"+(nd?" · "+nd+" diárias":"");
   }else{
     MODE="row"; DAY_COL=detectDayColumnFallback();
     countEl.innerHTML="<b>"+ROWS.length+"</b> registros";
   }
   $("#reload").style.display=""; $("#manualToggle").style.display="";
+  buildFilters();
   render();
 }
 
@@ -467,19 +513,55 @@ function regionCard(entry,terms){
   if(!ord.length){
     return '<div class="unit" style="--day:#5b6573"><span class="unit-bar"></span><div class="unit-main"><div class="unit-head"><div class="unit-id"><span class="unit-name">'+hl(entry.display,terms)+'</span></div><div class="unit-next na"><span class="nx-lbl">Sem dia</span><span class="nx-day">—</span></div></div></div></div>';
   }
-  const next=ord[0], color=COLORS[next.k]||"#5b6573";
-  const lbl = next.until===0 ? "Hoje" : "Próxima";
+  const next=ord[0];
+  const isDaily=!!entry.daily;
+  const color= isDaily ? "#3a455a" : (COLORS[next.k]||"#5b6573");
+  const lbl = isDaily ? "Rota" : (next.until===0 ? "Hoje" : "Próxima");
+  const dayPill = isDaily ? '<span class="nx-day daily">DIÁRIA</span>' : '<span class="nx-day">'+ABBR[next.k]+'</span>';
+  const relTxt = isDaily ? "todo dia útil" : rel(next.until);
   const note=(entry.variants&&entry.variants.length>1)
     ? '<div class="unit-var">grafias: '+entry.variants.join(" · ")+'</div>' : '';
-  return '<div class="unit" style="--day:'+color+'">'
+  return '<div class="unit'+(isDaily?' is-daily':'')+'" style="--day:'+color+'">'
     +'<span class="unit-bar"></span>'
     +'<div class="unit-main">'
       +'<div class="unit-head">'
         +'<div class="unit-id"><span class="unit-name">'+hl(entry.display,terms)+'</span>'+note+'</div>'
-        +'<div class="unit-next"><span class="nx-lbl">'+lbl+'</span><span class="nx-day">'+ABBR[next.k]+'</span><span class="nx-rel">'+rel(next.until)+'</span></div>'
+        +'<div class="unit-next"><span class="nx-lbl">'+lbl+'</span>'+dayPill+'<span class="nx-rel">'+relTxt+'</span></div>'
       +'</div>'
       +weekStrip(entry,next.k)
     +'</div></div>';
+}
+
+function buildFilters(){
+  const box=$("#filters"); if(!box) return;
+  if(MODE!=="matrix" || !ALL_DAY_KEYS.length){ box.innerHTML=""; return; }
+  let html='<span class="flbl">Filtrar por dia</span><div class="fchips">';
+  html+='<button class="fchip'+(activeFilter==null?' on':'')+'" data-f="">Todos</button>';
+  ALL_DAY_KEYS.forEach(k=>{
+    html+='<button class="fchip day'+(activeFilter===k?' on':'')+'" data-f="'+k+'" style="--c:'+(COLORS[k]||"#5b6573")+'">'+ABBR[k]+'</button>';
+  });
+  if(REGIONS.some(e=>e.daily)) html+='<button class="fchip'+(activeFilter==="DAILY"?' on':'')+'" data-f="DAILY">Diárias</button>';
+  html+='</div>';
+  box.innerHTML=html;
+  box.querySelectorAll(".fchip").forEach(b=> b.addEventListener("click",()=>{
+    const v=b.getAttribute("data-f");
+    activeFilter = v===""?null:v;
+    buildFilters(); render();
+  }));
+}
+
+function renderDayList(filter,raw){
+  let list = filter==="DAILY" ? REGIONS.filter(e=>e.daily) : REGIONS.filter(e=>e.dayKeys.includes(filter));
+  const terms = raw ? norm(raw).split(" ").filter(Boolean) : [];
+  if(terms.length) list=list.filter(e=>{ const hay=e.keys.join(" "); return terms.every(t=>hay.includes(t)); });
+  list.sort((a,b)=> a.display.localeCompare(b.display,"pt"));
+  const titulo = filter==="DAILY" ? "Rotas diárias" : "Entregas de "+PRETTY[filter];
+  const head='<div class="listhead">'+titulo+' · '+list.length+' '+(list.length===1?'região':'regiões')+(raw?' · filtro “'+raw+'”':'')+'</div>';
+  if(!list.length){
+    results.innerHTML=head+panel("∅","Nada aqui","Nenhuma região"+(raw?' com “'+raw+'”':'')+" nesse dia.");
+    return;
+  }
+  results.innerHTML=head+legendHTML()+list.map(e=>regionCard(e,terms)).join("");
 }
 
 function render(){
@@ -487,8 +569,14 @@ function render(){
   $("#clear").style.display=raw?"flex":"none";
   if(MODE==="matrix"){ if(!REGIONS.length) return; } else if(!ROWS.length) return;
 
+  // modo filtro por dia (a busca, se houver, refina dentro do dia)
+  if(MODE==="matrix" && activeFilter){
+    renderDayList(activeFilter,raw);
+    return;
+  }
+
   if(!raw){
-    results.innerHTML=panel("🔎","Comece a busca","Digite o nome de uma região/cidade, ou um CEP. Mostro na hora a próxima entrega e os dias em que ela se repete.");
+    results.innerHTML=panel("🔎","Comece a busca","Digite o nome de uma região/cidade, ou um CEP — ou use os filtros de dia acima para ver tudo que vai numa segunda, terça, etc.");
     return;
   }
 
