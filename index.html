@@ -56,9 +56,15 @@
   .body .place{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:18px;letter-spacing:-.01em;margin:0;word-break:break-word}
   .phrase{margin:9px 0 0;font-size:13.5px;color:var(--slate)}
   .phrase b{color:var(--ink);font-weight:600}
+  .variants{margin:9px 0 0;font-family:"Space Mono",monospace;font-size:10.5px;color:var(--slate-2);letter-spacing:.02em}
   .days{margin-top:12px;display:flex;flex-wrap:wrap;gap:7px}
   .daychip{font-family:"Space Mono",monospace;font-size:11px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 13%,#fff);border:1px solid color-mix(in srgb,var(--c) 32%,#fff);border-radius:999px;padding:5px 11px;letter-spacing:.02em;white-space:nowrap}
   .daychip.on{background:var(--c);color:#fff;border-color:var(--c)}
+  .cep{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 16px;margin-bottom:14px;animation:rise .3s cubic-bezier(.2,.7,.3,1) both}
+  .cep-tag{font-family:"Space Mono",monospace;font-weight:700;font-size:12px;letter-spacing:.04em;color:#fff;background:var(--ink);border-radius:8px;padding:7px 11px;white-space:nowrap}
+  .cep-info{font-family:"Space Grotesk",sans-serif;font-size:16px;color:var(--slate);min-width:0}
+  .cep-info b{color:var(--ink);font-weight:600}
+  .cep-info span{color:var(--slate-2);font-size:13.5px}
   .chip{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--slate);background:var(--line-2);border-radius:7px;padding:4px 9px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
   .chip b{color:var(--ink);font-weight:700}
   mark{background:#fde68a;color:inherit;border-radius:3px;padding:0 1px}
@@ -91,11 +97,11 @@
   <header>
     <p class="eyebrow">Roteiro de entregas · aba DADOS</p>
     <h1>Para onde vai a entrega?</h1>
-    <p class="sub">Digite a região, cidade ou bairro. O painel mostra a próxima entrega a partir de hoje — e em quais outros dias da semana ela se repete.</p>
+    <p class="sub">Digite a região, a cidade — ou um CEP. Pelo CEP eu busco a cidade e o bairro e mostro a próxima entrega a partir de hoje, com os dias em que ela se repete.</p>
 
     <div class="search">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="q" type="text" inputmode="search" autocomplete="off" placeholder="Ex.: Sorocaba, Itanhaém, Centro…" aria-label="Buscar região, cidade ou bairro">
+      <input id="q" type="text" inputmode="search" autocomplete="off" placeholder="Ex.: Sorocaba  ·  ou 18075-000" aria-label="Buscar região, cidade ou CEP">
       <button id="clear" title="Limpar" aria-label="Limpar busca">×</button>
     </div>
 
@@ -183,6 +189,33 @@ function matchDay(text){
   return null;
 }
 
+/* ---------- semelhança entre grafias ---------- */
+function lev(a,b){
+  const m=a.length,n=b.length;
+  if(!m) return n; if(!n) return m;
+  let prev=Array.from({length:n+1},(_,i)=>i), cur=new Array(n+1);
+  for(let i=1;i<=m;i++){
+    cur[0]=i;
+    for(let j=1;j<=n;j++){
+      const cost=a[i-1]===b[j-1]?0:1;
+      cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+cost);
+    }
+    const tmp=prev; prev=cur; cur=tmp;
+  }
+  return prev[n];
+}
+// mesma cidade escrita diferente? regra conservadora: mesma 1ª letra,
+// tamanhos próximos, e pouquíssimas diferenças de caractere.
+function similar(a,b){
+  if(a===b) return true;
+  const la=a.length, lb=b.length;
+  if(Math.abs(la-lb)>2) return false;
+  if(Math.min(la,lb)<5) return false;     // nomes curtos só batem se idênticos
+  if(a[0]!==b[0]) return false;
+  const allowed=Math.max(la,lb)>=12?2:1;
+  return lev(a,b)<=allowed;
+}
+
 /* ---------- detecção ---------- */
 function detectDayColumns(){
   const cols=[];
@@ -198,21 +231,47 @@ function detectDayColumnFallback(){ // modo linha: coluna cujos valores são dia
   return best;
 }
 
-/* ---------- montar índice região -> dias ---------- */
+/* ---------- montar índice região -> dias (com unificação de grafias) ---------- */
 function buildRegions(){
-  const map=new Map();
+  // 1) agrupa por grafia normalizada exata
+  const exact=new Map(); // normKey -> {key,count,displays:Map,days:Set}
   for(const c of DAY_COLS){
     for(const r of ROWS){
       const raw=(r[c.idx]||"").trim();
       if(!raw) continue;
       const key=norm(raw);
       if(!key) continue;
-      let e=map.get(key);
-      if(!e){ e={display:raw,days:new Set()}; map.set(key,e); }
-      e.days.add(c.key);
+      let e=exact.get(key);
+      if(!e){ e={key,count:0,displays:new Map(),days:new Set()}; exact.set(key,e); }
+      e.count++; e.days.add(c.key);
+      e.displays.set(raw,(e.displays.get(raw)||0)+1);
     }
   }
-  REGIONS=[...map.values()].map(e=>({display:e.display,dayKeys:[...e.days]}));
+  // 2) agrupa grafias parecidas — semente é a mais frequente
+  const seeds=[...exact.values()].sort((a,b)=> b.count-a.count || a.key.localeCompare(b.key));
+  const used=new Set(); const clusters=[];
+  for(const s of seeds){
+    if(used.has(s.key)) continue;
+    used.add(s.key);
+    const members=[s];
+    for(const o of seeds){
+      if(used.has(o.key)) continue;
+      if(similar(s.key,o.key)){ used.add(o.key); members.push(o); }
+    }
+    clusters.push(members);
+  }
+  // 3) consolida cada cluster num só registro
+  REGIONS=clusters.map(members=>{
+    const days=new Set(), keys=[], dispCount=new Map();
+    members.forEach(m=>{
+      m.days.forEach(d=>days.add(d));
+      keys.push(m.key);
+      m.displays.forEach((c,d)=> dispCount.set(d,(dispCount.get(d)||0)+c));
+    });
+    // nome exibido: grafia mais frequente; empate -> a mais longa (costuma ser a correta)
+    const canonical=[...dispCount.entries()].sort((a,b)=> b[1]-a[1] || b[0].length-a[0].length)[0][0];
+    return {display:canonical, dayKeys:[...days], keys, variants:[...dispCount.keys()]};
+  });
 }
 
 function findHeaderRow(grid){
@@ -276,6 +335,65 @@ function orderDays(dayKeys){
 }
 function rel(u){ return u===0?"hoje":u===1?"amanhã":"em "+u+" dias"; }
 
+/* ---------- consulta de CEP ---------- */
+const fmtCep = c => c.length>5 ? c.slice(0,5)+"-"+c.slice(5) : c;
+let CEP_SEQ=0; const CEP_CACHE={};
+
+async function lookupCEP(cep){
+  try{
+    const r=await fetch("https://viacep.com.br/ws/"+cep+"/json/",{cache:"force-cache"});
+    if(r.ok){ const j=await r.json(); if(!j.erro) return {cidade:j.localidade||"",bairro:j.bairro||"",uf:j.uf||"",logradouro:j.logradouro||""}; }
+  }catch(e){}
+  try{
+    const r=await fetch("https://brasilapi.com.br/api/cep/v1/"+cep);
+    if(r.ok){ const j=await r.json(); return {cidade:j.city||"",bairro:j.neighborhood||"",uf:j.state||"",logradouro:j.street||""}; }
+  }catch(e){}
+  return null;
+}
+
+function findRegionsByName(name){
+  if(MODE!=="matrix") return [];
+  const key=norm(name); if(!key) return [];
+  return REGIONS.filter(e=> (e.keys||[norm(e.display)]).some(k=>
+    k===key || k.includes(key) || key.includes(k) || similar(k,key)
+  ));
+}
+
+async function handleCEP(cep){
+  const seq=++CEP_SEQ;
+  results.innerHTML=panel("spinner","Buscando o CEP "+fmtCep(cep)+"…","Consultando cidade e bairro.");
+  let info=CEP_CACHE[cep];
+  if(info===undefined){ info=await lookupCEP(cep); CEP_CACHE[cep]=info; }
+  if(seq!==CEP_SEQ) return; // chegou tarde, já tem busca mais nova
+  if(!info){
+    results.innerHTML=panel("∅","CEP não encontrado","Confira os 8 dígitos. CEP consultado: "+fmtCep(cep)+".");
+    return;
+  }
+  renderCEP(cep,info);
+}
+
+function renderCEP(cep,info){
+  const cidade=info.cidade||"", bairro=info.bairro||"", uf=info.uf||"";
+  const banner='<div class="cep"><div class="cep-tag">CEP '+fmtCep(cep)+'</div>'
+    +'<div class="cep-info"><b>'+(cidade||"—")+(uf?"/"+uf:"")+'</b>'
+    +(bairro?' · '+bairro:'')
+    +(info.logradouro?'<span> · '+info.logradouro+'</span>':'')+'</div></div>';
+
+  const seen=new Set(), hits=[];
+  [...findRegionsByName(cidade),...findRegionsByName(bairro)].forEach(e=>{
+    const k=norm(e.display); if(!seen.has(k)){ seen.add(k); hits.push(e); }
+  });
+
+  let body;
+  if(hits.length){
+    body=hits.map(e=>regionCard(e,[cidade,bairro].filter(Boolean))).join("");
+  }else{
+    const alvo=(cidade||"esse CEP")+(uf?"/"+uf:"")+(bairro?" (bairro "+bairro+")":"");
+    body=panel("∅","Sem rota cadastrada","“"+alvo+"” não aparece na aba DADOS. Confira se a cidade está listada em alguma das colunas de dia da semana.");
+  }
+  results.innerHTML=banner+body;
+}
+
 /* ---------- render ---------- */
 function panel(icon,title,msg){
   const ic= icon==="spinner" ? '<div class="spinner"></div>' : '<div class="big">'+icon+'</div>';
@@ -304,11 +422,13 @@ function regionCard(entry,terms){
     phrase="Próxima: <b>"+PRETTY[next.k]+"</b> ("+rel(next.until)+") · também "+rest;
   }
   const chips=ord.map((o,i)=>'<span class="daychip'+(i===0?' on':'')+'" style="--c:'+(COLORS[o.k]||"#64748b")+'">'+PRETTY[o.k]+(i===0?" · "+rel(o.until):"")+'</span>').join("");
+  const note=(entry.variants&&entry.variants.length>1)
+    ? '<p class="variants">grafias unificadas: '+entry.variants.join(" · ")+'</p>' : '';
   return '<div class="card" style="--day:'+color+'">'
     +'<div class="stamp"><span class="lbl">'+stampLabel+'</span><span class="day">'+PRETTY[next.k]+'</span><span class="when">'+rel(next.until)+'</span></div>'
     +'<div class="body"><p class="place">'+hl(entry.display,terms)+'</p>'
     +'<p class="phrase">'+phrase+'</p>'
-    +'<div class="days">'+chips+'</div></div></div>';
+    +'<div class="days">'+chips+'</div>'+note+'</div></div>';
 }
 
 function render(){
@@ -317,7 +437,15 @@ function render(){
   if(MODE==="matrix"){ if(!REGIONS.length) return; } else if(!ROWS.length) return;
 
   if(!raw){
-    results.innerHTML=panel("🔎","Comece a busca","Digite o nome de uma região, cidade ou bairro. Mostro na hora a próxima entrega e os dias em que ela se repete.");
+    results.innerHTML=panel("🔎","Comece a busca","Digite o nome de uma região/cidade, ou um CEP. Mostro na hora a próxima entrega e os dias em que ela se repete.");
+    return;
+  }
+
+  // CEP? (só dígitos, sem letras)
+  const cd=digits(raw);
+  if(cd.length>=5 && !/[a-zA-Z]/.test(raw)){
+    if(cd.length<8){ results.innerHTML=panel("📮","CEP incompleto","Um CEP tem 8 números. Continue digitando — ex.: 18075-000."); return; }
+    handleCEP(cd.slice(0,8));
     return;
   }
 
@@ -326,10 +454,14 @@ function render(){
   if(MODE==="matrix"){
     const scored=[];
     for(const e of REGIONS){
-      const key=norm(e.display); let score=0;
-      for(const t of terms){ if(key.includes(t)) score+=(t.length>=4?8:4); }
-      const tokens=key.split(" ");
-      for(const t of terms){ if(tokens.some(w=>w.startsWith(t))) score+=4; if(key===t) score+=20; }
+      const hay=e.keys.join(" ");
+      const tokens=hay.split(" ");
+      let score=0;
+      for(const t of terms){
+        if(hay.includes(t)) score+=(t.length>=4?8:4);
+        if(tokens.some(w=>w.startsWith(t))) score+=4;
+        if(e.keys.includes(t)) score+=20;
+      }
       if(score>0) scored.push({e,score});
     }
     scored.sort((a,b)=> b.score-a.score || a.e.display.localeCompare(b.e.display));
