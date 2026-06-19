@@ -9,153 +9,81 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0f1729;
-    --slate:#64748b;
-    --slate-2:#94a3b8;
-    --line:#e4e8ee;
-    --line-2:#eef1f5;
-    --bg:#f4f6f9;
-    --surface:#ffffff;
+    --ink:#0f1729; --slate:#64748b; --slate-2:#94a3b8;
+    --line:#e4e8ee; --line-2:#eef1f5; --bg:#f4f6f9; --surface:#ffffff;
     --focus:#4338ca;
     --shadow:0 1px 2px rgba(15,23,41,.04),0 8px 28px rgba(15,23,41,.06);
-    /* dias da semana */
-    --seg:#2563eb; --ter:#0d9488; --qua:#b45309; --qui:#db2777;
-    --sex:#7c3aed; --sab:#dc2626; --dom:#475569; --na:#64748b;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:"Inter",system-ui,-apple-system,sans-serif;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    padding:clamp(16px,4vw,40px);
-  }
+  body{background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;padding:clamp(16px,4vw,40px)}
   .wrap{max-width:860px;margin:0 auto}
 
-  /* Cabeçalho */
-  header{margin-bottom:clamp(20px,4vw,34px)}
-  .eyebrow{
-    font-family:"Space Mono",monospace;
-    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--slate);margin:0 0 10px;
-    display:flex;align-items:center;gap:10px;
-  }
+  header{margin-bottom:clamp(20px,4vw,30px)}
+  .eyebrow{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--slate);margin:0 0 10px;display:flex;align-items:center;gap:10px}
   .eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
-  h1{
-    font-family:"Space Grotesk",sans-serif;
-    font-weight:700;font-size:clamp(26px,5.5vw,40px);
-    letter-spacing:-.02em;line-height:1.04;margin:0;
-  }
-  .sub{color:var(--slate);margin:10px 0 0;font-size:15px;max-width:46ch}
+  h1{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:clamp(26px,5.5vw,40px);letter-spacing:-.02em;line-height:1.04;margin:0}
+  .sub{color:var(--slate);margin:10px 0 0;font-size:15px;max-width:50ch}
 
-  /* Barra de busca */
-  .search{
-    margin-top:clamp(22px,4vw,30px);
-    background:var(--surface);border:1px solid var(--line);
-    border-radius:16px;box-shadow:var(--shadow);
-    padding:8px;display:flex;gap:8px;align-items:center;
-    transition:border-color .15s,box-shadow .15s;
-  }
+  .search{margin-top:clamp(22px,4vw,28px);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:8px;display:flex;gap:8px;align-items:center;transition:border-color .15s,box-shadow .15s}
   .search:focus-within{border-color:var(--focus);box-shadow:0 0 0 4px rgba(67,56,202,.10),var(--shadow)}
   .search svg{flex:none;margin-left:10px;color:var(--slate-2)}
-  #q{
-    flex:1;border:0;outline:0;background:transparent;
-    font-family:"Space Grotesk",sans-serif;font-size:clamp(17px,3.4vw,21px);
-    font-weight:500;color:var(--ink);padding:12px 4px;min-width:0;
-  }
+  #q{flex:1;border:0;outline:0;background:transparent;font-family:"Space Grotesk",sans-serif;font-size:clamp(17px,3.4vw,21px);font-weight:500;color:var(--ink);padding:12px 4px;min-width:0}
   #q::placeholder{color:var(--slate-2);font-weight:400}
-  #clear{
-    flex:none;border:0;background:var(--line-2);color:var(--slate);
-    width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:18px;
-    display:none;align-items:center;justify-content:center;margin-right:4px;
-  }
+  #clear{flex:none;border:0;background:var(--line-2);color:var(--slate);width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:18px;display:none;align-items:center;justify-content:center;margin-right:4px}
   #clear:hover{background:#e2e8f0;color:var(--ink)}
 
-  /* meta / status */
-  .meta{
-    display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;
-    margin-top:14px;font-family:"Space Mono",monospace;font-size:12px;color:var(--slate);
-  }
+  .meta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:14px;font-family:"Space Mono",monospace;font-size:12px;color:var(--slate)}
   .meta b{color:var(--ink);font-weight:700}
+  #today{color:var(--ink);font-weight:700;background:var(--line-2);padding:3px 10px;border-radius:7px}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--slate-2);display:inline-block;margin-right:7px;vertical-align:1px}
   .dot.ok{background:#16a34a}.dot.warn{background:#d97706}.dot.err{background:#dc2626}
   .linkbtn{background:none;border:0;color:var(--focus);font-family:inherit;font-size:12px;cursor:pointer;text-decoration:underline;padding:0}
 
-  /* Resultados */
-  #results{margin-top:clamp(20px,4vw,28px);display:flex;flex-direction:column;gap:14px}
+  #results{margin-top:clamp(20px,4vw,26px);display:flex;flex-direction:column;gap:14px}
 
-  .card{
-    background:var(--surface);border:1px solid var(--line);border-radius:16px;
-    box-shadow:var(--shadow);overflow:hidden;
-    display:grid;grid-template-columns:118px 1fr;
-    animation:rise .35s cubic-bezier(.2,.7,.3,1) both;
-  }
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:128px 1fr;animation:rise .32s cubic-bezier(.2,.7,.3,1) both}
   @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-  /* estampa do dia */
-  .stamp{
-    background:var(--day,var(--na));color:#fff;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:18px 10px;text-align:center;gap:2px;position:relative;
-  }
+  .stamp{background:var(--day);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 10px;text-align:center;gap:3px;position:relative}
   .stamp::after{content:"";position:absolute;inset:8px;border:1.5px dashed rgba(255,255,255,.45);border-radius:10px;pointer-events:none}
-  .stamp .lbl{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.85}
-  .stamp .day{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:clamp(16px,3.6vw,21px);line-height:1.05;letter-spacing:-.01em}
+  .stamp .lbl{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;opacity:.9}
+  .stamp .day{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:clamp(17px,3.8vw,23px);line-height:1.02;letter-spacing:-.01em}
   .stamp .day.small{font-size:14px}
+  .stamp .when{font-family:"Space Mono",monospace;font-size:10px;opacity:.92;margin-top:1px}
 
   .body{padding:16px 18px;min-width:0}
   .body .place{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:18px;letter-spacing:-.01em;margin:0;word-break:break-word}
-  .fields{margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px 8px}
-  .chip{
-    font-family:"Space Mono",monospace;font-size:11.5px;color:var(--slate);
-    background:var(--line-2);border-radius:7px;padding:4px 9px;
-    white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;
-  }
+  .phrase{margin:9px 0 0;font-size:13.5px;color:var(--slate)}
+  .phrase b{color:var(--ink);font-weight:600}
+  .days{margin-top:12px;display:flex;flex-wrap:wrap;gap:7px}
+  .daychip{font-family:"Space Mono",monospace;font-size:11px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 13%,#fff);border:1px solid color-mix(in srgb,var(--c) 32%,#fff);border-radius:999px;padding:5px 11px;letter-spacing:.02em;white-space:nowrap}
+  .daychip.on{background:var(--c);color:#fff;border-color:var(--c)}
+  .chip{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--slate);background:var(--line-2);border-radius:7px;padding:4px 9px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
   .chip b{color:var(--ink);font-weight:700}
   mark{background:#fde68a;color:inherit;border-radius:3px;padding:0 1px}
 
-  /* estados vazios */
-  .panel{
-    background:var(--surface);border:1px solid var(--line);border-radius:16px;
-    box-shadow:var(--shadow);padding:clamp(22px,5vw,34px);text-align:center;
-  }
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:clamp(22px,5vw,34px);text-align:center}
   .panel h2{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:19px;margin:0 0 6px;letter-spacing:-.01em}
-  .panel p{color:var(--slate);margin:0 auto;max-width:42ch;font-size:14.5px}
+  .panel p{color:var(--slate);margin:0 auto;max-width:44ch;font-size:14.5px}
   .panel .big{font-size:34px;margin-bottom:6px}
   .spinner{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--focus);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* importar manual */
   #import{display:none;margin-top:18px}
-  #import textarea{
-    width:100%;min-height:140px;border:1px solid var(--line);border-radius:12px;
-    padding:12px 14px;font-family:"Space Mono",monospace;font-size:12.5px;resize:vertical;
-    color:var(--ink);background:#fbfcfe;outline:none;
-  }
+  #import textarea{width:100%;min-height:140px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-family:"Space Mono",monospace;font-size:12.5px;resize:vertical;color:var(--ink);background:#fbfcfe;outline:none}
   #import textarea:focus{border-color:var(--focus)}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
-  .btn{
-    font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:14px;cursor:pointer;
-    border:0;border-radius:10px;padding:11px 18px;background:var(--ink);color:#fff;
-  }
+  .btn{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:0;border-radius:10px;padding:11px 18px;background:var(--ink);color:#fff}
   .btn:hover{background:#1e293b}
-  .btn.ghost{background:var(--line-2);color:var(--ink)}
-  .btn.ghost:hover{background:#e2e8f0}
   .filelabel{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:14px;color:var(--focus);cursor:pointer;text-decoration:underline}
   input[type=file]{display:none}
   .hint{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--slate-2);margin-top:10px;line-height:1.6}
 
   footer{margin-top:30px;font-family:"Space Mono",monospace;font-size:11px;color:var(--slate-2);text-align:center;line-height:1.7}
 
-  @media(max-width:480px){
-    .card{grid-template-columns:92px 1fr}
-    .stamp{padding:14px 6px}
-  }
-  @media (prefers-reduced-motion:reduce){
-    *{animation:none!important;transition:none!important}
-  }
+  @media(max-width:480px){.card{grid-template-columns:100px 1fr}.stamp{padding:14px 6px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -163,36 +91,37 @@
   <header>
     <p class="eyebrow">Roteiro de entregas · aba DADOS</p>
     <h1>Para onde vai a entrega?</h1>
-    <p class="sub">Digite a região, cidade, bairro ou um CEP próximo. O painel mostra o dia da semana em que a entrega acontece naquela área.</p>
+    <p class="sub">Digite a região, cidade ou bairro. O painel mostra a próxima entrega a partir de hoje — e em quais outros dias da semana ela se repete.</p>
 
     <div class="search">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="q" type="text" inputmode="search" autocomplete="off" placeholder="Ex.: Sorocaba, Centro, 18075…" aria-label="Buscar região, bairro ou CEP">
+      <input id="q" type="text" inputmode="search" autocomplete="off" placeholder="Ex.: Sorocaba, Itanhaém, Centro…" aria-label="Buscar região, cidade ou bairro">
       <button id="clear" title="Limpar" aria-label="Limpar busca">×</button>
     </div>
 
     <div class="meta">
       <span id="status"><span class="dot"></span>Carregando dados…</span>
+      <span id="today"></span>
       <span id="count"></span>
       <button class="linkbtn" id="reload" style="display:none">atualizar</button>
       <button class="linkbtn" id="manualToggle" style="display:none">importar manualmente</button>
     </div>
 
     <div id="import">
-      <textarea id="csvText" placeholder="Cole aqui o conteúdo da planilha (CSV) — ou use o botão para enviar o arquivo .csv"></textarea>
+      <textarea id="csvText" placeholder="Cole aqui o conteúdo da aba DADOS (CSV) — ou use o botão para enviar o arquivo .csv"></textarea>
       <div class="row">
         <button class="btn" id="loadText">Usar estes dados</button>
         <label class="filelabel" for="csvFile">enviar arquivo .csv</label>
         <input type="file" id="csvFile" accept=".csv,text/csv,text/plain">
       </div>
-      <p class="hint">No Google Sheets: Arquivo › Fazer download › Valores separados por vírgulas (.csv). Abra a aba DADOS antes de baixar.</p>
+      <p class="hint">No Google Sheets: abra a aba DADOS › Arquivo › Fazer download › Valores separados por vírgulas (.csv).</p>
     </div>
   </header>
 
   <div id="results"></div>
 
   <footer>
-    Lê os dados ao vivo da planilha publicada · busca por região, cidade, bairro e CEP<br>
+    Lê os dados ao vivo da planilha publicada · próxima entrega calculada a partir do dia de hoje<br>
     <span id="src"></span>
   </footer>
 </div>
@@ -201,55 +130,52 @@
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQVjhVlvnXYXshAIeEWWEOn9PyhLA2f1ypnwM-engSHZCMbBqfbYjneXVjd8m5f9kV4wN1ETh6hQjza/pub?output=csv";
 
 const $ = s => document.querySelector(s);
-const results = $("#results"), statusEl = $("#status"), countEl = $("#count");
+const results=$("#results"), statusEl=$("#status"), countEl=$("#count");
 
-let HEADERS = [], ROWS = [], DAY_COL = -1;
+let HEADERS=[], ROWS=[], DAY_COLS=[], REGIONS=[], MODE="matrix", DAY_COL=-1;
 
-/* ---------- normalização ---------- */
-const norm = s => (s||"").toString()
-  .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-  .toUpperCase().replace(/\s+/g," ").trim();
+/* ---------- helpers ---------- */
+const norm = s => (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/\s+/g," ").trim();
 const digits = s => (s||"").toString().replace(/\D/g,"");
 
-/* ---------- parser CSV robusto ---------- */
 function parseCSV(text){
-  text = text.replace(/^\uFEFF/,"");
-  const rows=[]; let row=[], field="", q=false;
+  text=text.replace(/^\uFEFF/,"");
+  const rows=[]; let row=[],field="",q=false;
   for(let i=0;i<text.length;i++){
     const c=text[i];
-    if(q){
-      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++} else q=false; }
-      else field+=c;
-    }else{
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){field+='"';i++} else q=false; } else field+=c; }
+    else{
       if(c==='"') q=true;
       else if(c===','){ row.push(field); field=""; }
       else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=""; }
-      else if(c==='\r'){ /* ignora */ }
+      else if(c==='\r'){}
       else field+=c;
     }
   }
   if(field.length||row.length){ row.push(field); rows.push(row); }
-  return rows.filter(r=> r.some(c=> (c||"").trim()!==""));
+  return rows.filter(r=> r.some(c=>(c||"").trim()!==""));
 }
 
-/* ---------- dias da semana ---------- */
-const DAYS = [
-  {k:"SEGUNDA", names:["SEGUNDA","SEGUNDA-FEIRA","SEG"], css:"--seg", abbr:"SEG"},
-  {k:"TERCA",   names:["TERCA","TERCA-FEIRA","TER"],      css:"--ter", abbr:"TER"},
-  {k:"QUARTA",  names:["QUARTA","QUARTA-FEIRA","QUA"],    css:"--qua", abbr:"QUA"},
-  {k:"QUINTA",  names:["QUINTA","QUINTA-FEIRA","QUI"],    css:"--qui", abbr:"QUI"},
-  {k:"SEXTA",   names:["SEXTA","SEXTA-FEIRA","SEX"],      css:"--sex", abbr:"SEX"},
-  {k:"SABADO",  names:["SABADO","SAB"],                   css:"--sab", abbr:"SAB"},
-  {k:"DOMINGO", names:["DOMINGO","DOM"],                  css:"--dom", abbr:"DOM"},
+/* ---------- dias ---------- */
+const DAYS=[
+  {k:"SEGUNDA",names:["SEGUNDA-FEIRA","SEGUNDA","SEG"]},
+  {k:"TERCA",  names:["TERCA-FEIRA","TERCA","TER"]},
+  {k:"QUARTA", names:["QUARTA-FEIRA","QUARTA","QUA"]},
+  {k:"QUINTA", names:["QUINTA-FEIRA","QUINTA","QUI"]},
+  {k:"SEXTA",  names:["SEXTA-FEIRA","SEXTA","SEX"]},
+  {k:"SABADO", names:["SABADO","SAB"]},
+  {k:"DOMINGO",names:["DOMINGO","DOM"]},
 ];
-const PRETTY = {SEGUNDA:"Segunda",TERCA:"Terça",QUARTA:"Quarta",QUINTA:"Quinta",SEXTA:"Sexta",SABADO:"Sábado",DOMINGO:"Domingo"};
+const PRETTY={SEGUNDA:"Segunda",TERCA:"Terça",QUARTA:"Quarta",QUINTA:"Quinta",SEXTA:"Sexta",SABADO:"Sábado",DOMINGO:"Domingo"};
+const COLORS={SEGUNDA:"#2563eb",TERCA:"#0d9488",QUARTA:"#b45309",QUINTA:"#db2777",SEXTA:"#7c3aed",SABADO:"#dc2626",DOMINGO:"#475569"};
+const DAYKEY_TO_JS={DOMINGO:0,SEGUNDA:1,TERCA:2,QUARTA:3,QUINTA:4,SEXTA:5,SABADO:6};
+const JS_TO_KEY=["DOMINGO","SEGUNDA","TERCA","QUARTA","QUINTA","SEXTA","SABADO"];
+const todayIdx=new Date().getDay();
 
-// retorna {k,css,abbr,pretty} se o texto contém um dia da semana
 function matchDay(text){
-  const t = " "+norm(text)+" ";
+  const t=" "+norm(text)+" ";
   for(const d of DAYS){
     for(const n of d.names){
-      // nomes completos: contains; abreviações: precisa de limite
       if(n.length>3){ if(t.includes(n)) return d; }
       else { if(new RegExp("(^|[^A-Z])"+n+"([^A-Z]|$)").test(t)) return d; }
     }
@@ -257,192 +183,180 @@ function matchDay(text){
   return null;
 }
 
-/* detecta a coluna que mais parece conter o dia da semana */
-function detectDayColumn(){
-  let best=-1, bestScore=0;
+/* ---------- detecção ---------- */
+function detectDayColumns(){
+  const cols=[];
+  HEADERS.forEach((h,i)=>{ const d=matchDay(h); if(d) cols.push({idx:i,key:d.k}); });
+  return cols;
+}
+function detectDayColumnFallback(){ // modo linha: coluna cujos valores são dias
+  let best=-1,score=0;
   for(let c=0;c<HEADERS.length;c++){
-    let hits=0;
-    for(const r of ROWS){ if(matchDay(r[c])) hits++; }
-    const headerBonus = /DIA|SEMANA|ENTREG|ROTA/.test(norm(HEADERS[c])) ? ROWS.length*0.15 : 0;
-    const score = hits + headerBonus;
-    if(score>bestScore){ bestScore=score; best=c; }
+    let hits=0; for(const r of ROWS){ if(matchDay(r[c])) hits++; }
+    if(hits>score){score=hits;best=c;}
   }
-  return bestScore >= Math.max(1, ROWS.length*0.25) ? best : best; // usa melhor mesmo que parcial
+  return best;
 }
 
-/* ---------- carregar dados ---------- */
+/* ---------- montar índice região -> dias ---------- */
+function buildRegions(){
+  const map=new Map();
+  for(const c of DAY_COLS){
+    for(const r of ROWS){
+      const raw=(r[c.idx]||"").trim();
+      if(!raw) continue;
+      const key=norm(raw);
+      if(!key) continue;
+      let e=map.get(key);
+      if(!e){ e={display:raw,days:new Set()}; map.set(key,e); }
+      e.days.add(c.key);
+    }
+  }
+  REGIONS=[...map.values()].map(e=>({display:e.display,dayKeys:[...e.days]}));
+}
+
 function ingest(text){
-  const grid = parseCSV(text);
-  if(grid.length<2){ throw new Error("poucos dados"); }
-  HEADERS = grid[0].map(h=>h.trim());
-  ROWS = grid.slice(1);
-  DAY_COL = detectDayColumn();
-  countEl.innerHTML = "<b>"+ROWS.length+"</b> registros · <b>"+HEADERS.length+"</b> colunas";
-  $("#reload").style.display="";
-  $("#manualToggle").style.display="";
+  const grid=parseCSV(text);
+  if(grid.length<2) throw new Error("poucos dados");
+  HEADERS=grid[0].map(h=>h.trim());
+  ROWS=grid.slice(1);
+  DAY_COLS=detectDayColumns();
+  if(DAY_COLS.length>=2){
+    MODE="matrix"; buildRegions();
+    countEl.innerHTML="<b>"+REGIONS.length+"</b> regiões · "+DAY_COLS.length+" dias";
+  }else{
+    MODE="row"; DAY_COL=detectDayColumnFallback();
+    countEl.innerHTML="<b>"+ROWS.length+"</b> registros";
+  }
+  $("#reload").style.display=""; $("#manualToggle").style.display="";
   render();
 }
 
+/* ---------- carregar ---------- */
+function setStatus(kind,text){
+  const cls=kind==="ok"?"ok":kind==="err"?"err":kind==="warn"?"warn":"";
+  statusEl.innerHTML='<span class="dot '+cls+'"></span>'+text;
+}
 async function loadLive(){
   setStatus("loading","Carregando dados…");
-  results.innerHTML = panel("spinner","Buscando a planilha","Lendo a versão publicada mais recente.");
+  results.innerHTML=panel("spinner","Buscando a planilha","Lendo a versão publicada mais recente.");
   try{
-    const res = await fetch(CSV_URL,{cache:"no-store"});
+    const res=await fetch(CSV_URL,{cache:"no-store"});
     if(!res.ok) throw new Error("HTTP "+res.status);
-    const txt = await res.text();
+    const txt=await res.text();
     if(/<html|<!DOCTYPE/i.test(txt.slice(0,200))) throw new Error("não é CSV");
     ingest(txt);
     setStatus("ok","Dados ao vivo · "+new Date().toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}));
   }catch(err){
     setStatus("err","Não consegui ler a planilha automaticamente");
-    $("#manualToggle").style.display="";
-    $("#import").style.display="block";
-    results.innerHTML = panel("⚠️","Bloqueio ao buscar online",
-      "O navegador não deixou ler o link direto (restrição do Google/CORS). Cole o CSV ou envie o arquivo logo acima — funciona igual e fica salvo só nesta sessão.");
+    $("#manualToggle").style.display=""; $("#import").style.display="block";
+    results.innerHTML=panel("⚠️","Bloqueio ao buscar online","O navegador não deixou ler o link direto (restrição do Google/CORS). Cole o CSV ou envie o arquivo logo acima — fica salvo só nesta sessão.");
   }
 }
 
-function setStatus(kind,text){
-  const cls = kind==="ok"?"ok":kind==="err"?"err":kind==="warn"?"warn":"";
-  statusEl.innerHTML = '<span class="dot '+cls+'"></span>'+text;
+/* ---------- lógica de próxima entrega ---------- */
+function orderDays(dayKeys){
+  const arr=dayKeys.map(k=>({k,js:DAYKEY_TO_JS[k]}));
+  arr.forEach(o=> o.until=(o.js-todayIdx+7)%7 );
+  arr.sort((a,b)=>a.until-b.until);
+  return arr;
 }
+function rel(u){ return u===0?"hoje":u===1?"amanhã":"em "+u+" dias"; }
 
 /* ---------- render ---------- */
 function panel(icon,title,msg){
-  const ic = icon==="spinner" ? '<div class="spinner"></div>' : '<div class="big">'+icon+'</div>';
+  const ic= icon==="spinner" ? '<div class="spinner"></div>' : '<div class="big">'+icon+'</div>';
   return '<div class="panel">'+ic+'<h2>'+title+'</h2><p>'+msg+'</p></div>';
 }
-
-function dayStamp(val){
-  const d = matchDay(val);
-  if(d){
-    const css = getComputedStyle(document.documentElement).getPropertyValue(d.css).trim();
-    return {color:css, big:PRETTY[d.k], lbl:"Entrega"};
-  }
-  const v = (val||"").toString().trim();
-  if(v) return {color:"var(--na)", big:v, lbl:"Programação", small:v.length>10};
-  return {color:"var(--na)", big:"—", lbl:"Sem dia"};
-}
-
 function hl(text,terms){
-  let t = (text==null?"":String(text));
-  terms.forEach(term=>{
-    if(!term) return;
-    const re = new RegExp("("+term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");
-    t = t.replace(re,"<mark>$1</mark>");
-  });
+  let t=(text==null?"":String(text));
+  terms.forEach(term=>{ if(!term) return;
+    const re=new RegExp("("+term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");
+    t=t.replace(re,"<mark>$1</mark>"); });
   return t;
 }
 
-function rowCard(r, terms){
-  const dayVal = DAY_COL>=0 ? r[DAY_COL] : "";
-  const st = dayStamp(dayVal);
-
-  // título = primeira coluna não-dia com conteúdo
-  let titleIdx = HEADERS.findIndex((h,i)=> i!==DAY_COL && (r[i]||"").trim()!=="");
-  if(titleIdx<0) titleIdx = 0;
-  const title = r[titleIdx] || "—";
-
-  // chips: demais colunas com conteúdo (limita pra não poluir)
-  let chips="";
-  let shown=0;
-  for(let i=0;i<HEADERS.length;i++){
-    if(i===DAY_COL || i===titleIdx) continue;
-    const v=(r[i]||"").trim();
-    if(!v) continue;
-    const label = HEADERS[i] ? HEADERS[i]+": " : "";
-    chips += '<span class="chip">'+label+'<b>'+hl(v,terms)+'</b></span>';
-    if(++shown>=6) break;
+function regionCard(entry,terms){
+  const ord=orderDays(entry.dayKeys);
+  if(!ord.length){
+    return '<div class="card" style="--day:#64748b"><div class="stamp"><span class="lbl">Sem dia</span><span class="day">—</span></div><div class="body"><p class="place">'+hl(entry.display,terms)+'</p></div></div>';
   }
-
-  return '<div class="card" style="--day:'+st.color+'">'
-    + '<div class="stamp"><span class="lbl">'+st.lbl+'</span>'
-    + '<span class="day'+(st.small?' small':'')+'">'+st.big+'</span></div>'
-    + '<div class="body"><p class="place">'+hl(title,terms)+'</p>'
-    + (chips?'<div class="fields">'+chips+'</div>':'')
-    + '</div></div>';
+  const next=ord[0], color=COLORS[next.k]||"#64748b";
+  const stampLabel = next.until===0 ? "Entrega hoje" : "Próxima";
+  let phrase;
+  if(ord.length===1){
+    phrase="Entrega na <b>"+PRETTY[next.k]+"</b> · "+rel(next.until);
+  }else{
+    const rest=ord.slice(1).map(o=>PRETTY[o.k]).join(", ");
+    phrase="Próxima: <b>"+PRETTY[next.k]+"</b> ("+rel(next.until)+") · também "+rest;
+  }
+  const chips=ord.map((o,i)=>'<span class="daychip'+(i===0?' on':'')+'" style="--c:'+(COLORS[o.k]||"#64748b")+'">'+PRETTY[o.k]+(i===0?" · "+rel(o.until):"")+'</span>').join("");
+  return '<div class="card" style="--day:'+color+'">'
+    +'<div class="stamp"><span class="lbl">'+stampLabel+'</span><span class="day">'+PRETTY[next.k]+'</span><span class="when">'+rel(next.until)+'</span></div>'
+    +'<div class="body"><p class="place">'+hl(entry.display,terms)+'</p>'
+    +'<p class="phrase">'+phrase+'</p>'
+    +'<div class="days">'+chips+'</div></div></div>';
 }
 
-let RENDER_TIMER=null;
 function render(){
-  const raw = $("#q").value.trim();
-  $("#clear").style.display = raw ? "flex" : "none";
-
-  if(!ROWS.length) return;
+  const raw=$("#q").value.trim();
+  $("#clear").style.display=raw?"flex":"none";
+  if(MODE==="matrix"){ if(!REGIONS.length) return; } else if(!ROWS.length) return;
 
   if(!raw){
-    results.innerHTML = panel("🔎","Comece a busca",
-      "Digite o nome de uma região, cidade, bairro ou um CEP. Mostro na hora o dia de entrega correspondente.");
+    results.innerHTML=panel("🔎","Comece a busca","Digite o nome de uma região, cidade ou bairro. Mostro na hora a próxima entrega e os dias em que ela se repete.");
     return;
   }
 
-  const isCep = digits(raw).length>=4 && /^\d[\d.\- ]*$/.test(raw);
-  const terms = norm(raw).split(" ").filter(Boolean);
-  const cepDigits = digits(raw);
+  const terms=norm(raw).split(" ").filter(Boolean);
 
+  if(MODE==="matrix"){
+    const scored=[];
+    for(const e of REGIONS){
+      const key=norm(e.display); let score=0;
+      for(const t of terms){ if(key.includes(t)) score+=(t.length>=4?8:4); }
+      const tokens=key.split(" ");
+      for(const t of terms){ if(tokens.some(w=>w.startsWith(t))) score+=4; if(key===t) score+=20; }
+      if(score>0) scored.push({e,score});
+    }
+    scored.sort((a,b)=> b.score-a.score || a.e.display.localeCompare(b.e.display));
+    if(!scored.length){
+      results.innerHTML=panel("∅","Nada encontrado para “"+raw+"”","Tente outro nome — pode ser a cidade, a região ou o bairro. Confira também se a aba DADOS já tem essa área cadastrada.");
+      return;
+    }
+    const top=scored.slice(0,50);
+    results.innerHTML=top.map(s=>regionCard(s.e,terms)).join("");
+    if(scored.length>50) results.innerHTML+='<p class="hint" style="text-align:center">Mostrando 50 de '+scored.length+' resultados.</p>';
+    return;
+  }
+
+  /* modo linha (fallback) */
   const scored=[];
   for(const r of ROWS){
-    let score=0; let cepHit=false;
-    if(isCep){
-      for(let i=0;i<HEADERS.length;i++){
-        const cd = digits(r[i]);
-        if(cd.length>=5){
-          if(cd===cepDigits){ score+=100; cepHit=true; }
-          else if(cd.startsWith(cepDigits) || cepDigits.startsWith(cd.slice(0,5))){ score+=40; cepHit=true; }
-          else if(cd.slice(0,Math.min(5,cepDigits.length))===cepDigits.slice(0,Math.min(5,cd.length))){ score+=12; cepHit=true; }
-        }
-      }
-    }
-    if(!cepHit || !isCep){
-      const hay = norm(r.join(" "));
-      for(const t of terms){
-        if(hay.includes(t)) score += (t.length>=4?8:4);
-      }
-      // bônus se bate começo de palavra
-      const tokens = hay.split(" ");
-      for(const t of terms){
-        if(tokens.some(w=>w.startsWith(t))) score+=3;
-      }
-    }
+    const hay=norm(r.join(" ")); let score=0;
+    for(const t of terms){ if(hay.includes(t)) score+=(t.length>=4?8:4); }
     if(score>0) scored.push({r,score});
   }
-
   scored.sort((a,b)=>b.score-a.score);
-
-  if(!scored.length){
-    results.innerHTML = panel("∅","Nada encontrado para “"+raw+"”",
-      "Tente outro termo — pode ser o nome da cidade, da rota, do bairro ou os primeiros dígitos do CEP. Confira também se a aba DADOS tem essa área cadastrada.");
-    return;
-  }
-
-  const top = scored.slice(0,40);
-  results.innerHTML = top.map(s=>rowCard(s.r,terms)).join("");
-  if(scored.length>40){
-    results.innerHTML += '<p class="hint" style="text-align:center">Mostrando 40 de '+scored.length+' resultados. Refine a busca para ver menos.</p>';
-  }
+  if(!scored.length){ results.innerHTML=panel("∅","Nada encontrado","Tente outro termo."); return; }
+  results.innerHTML=scored.slice(0,50).map(s=>{
+    const dv=DAY_COL>=0?s.r[DAY_COL]:""; const d=matchDay(dv);
+    const e={display:(s.r.find((v,i)=>i!==DAY_COL&&(v||"").trim())||s.r[0]||"—"),dayKeys:d?[d.k]:[]};
+    return regionCard(e,terms);
+  }).join("");
 }
 
 /* ---------- eventos ---------- */
-$("#q").addEventListener("input",()=>{ clearTimeout(RENDER_TIMER); RENDER_TIMER=setTimeout(render,90); });
+let T=null;
+$("#q").addEventListener("input",()=>{ clearTimeout(T); T=setTimeout(render,90); });
 $("#clear").addEventListener("click",()=>{ $("#q").value=""; render(); $("#q").focus(); });
 $("#reload").addEventListener("click",loadLive);
-$("#manualToggle").addEventListener("click",()=>{
-  const im=$("#import"); im.style.display = im.style.display==="block"?"none":"block";
-});
-$("#loadText").addEventListener("click",()=>{
-  const t=$("#csvText").value.trim();
-  if(!t) return;
-  try{ ingest(t); setStatus("ok","Dados importados manualmente"); $("#import").style.display="none"; }
-  catch(e){ setStatus("err","Não entendi esse conteúdo como CSV"); }
-});
-$("#csvFile").addEventListener("change",e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const rd=new FileReader();
-  rd.onload=()=>{ try{ ingest(rd.result); setStatus("ok","Arquivo carregado: "+f.name); $("#import").style.display="none"; }catch(_){ setStatus("err","Arquivo não parece um CSV válido"); } };
-  rd.readAsText(f,"utf-8");
-});
+$("#manualToggle").addEventListener("click",()=>{ const im=$("#import"); im.style.display=im.style.display==="block"?"none":"block"; });
+$("#loadText").addEventListener("click",()=>{ const t=$("#csvText").value.trim(); if(!t)return; try{ingest(t);setStatus("ok","Dados importados manualmente");$("#import").style.display="none";}catch(e){setStatus("err","Não entendi esse conteúdo como CSV");} });
+$("#csvFile").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{try{ingest(rd.result);setStatus("ok","Arquivo carregado: "+f.name);$("#import").style.display="none";}catch(_){setStatus("err","Arquivo não parece um CSV válido");}}; rd.readAsText(f,"utf-8"); });
 
-$("#src").textContent = "fonte: " + CSV_URL.slice(0,72) + "…";
+$("#today").textContent="Hoje: "+PRETTY[JS_TO_KEY[todayIdx]];
+$("#src").textContent="fonte: "+CSV_URL.slice(0,72)+"…";
 loadLive();
 </script>
 </body>
